@@ -1,0 +1,51 @@
+version: '3.5'
+
+volumes:
+  data-rabbitmq:
+
+services:
+  app:
+    env_file:
+      - .env
+    ports:
+      - '8080:80'
+      - '${DOCKER_HTTP_PORT}:15672'
+    image: golang:1.18.4-buster
+    working_dir: /app
+    command: go run cmd/main.go
+    volumes:
+      - ./:/app
+    environment:
+      GOPATH: /
+    networks:
+      - default
+      - backend
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    links: 
+      - rabbitmq
+
+  rabbitmq:
+    build: docker/rabbitmq
+    volumes:
+      - data-rabbitmq:/var/lib/rabbitmq
+    ports:
+      - '${DOCKER_RABBITMQ_PORT}:5672'
+      - '${DOCKER_RABBITMQ_PANEL_PORT}:15672'
+    environment:
+      DOCKER_RABBITMQ_USER: ${DOCKER_RABBITMQ_USER}
+      DOCKER_RABBITMQ_PASSWORD: ${DOCKER_RABBITMQ_PASSWORD}
+      DOCKER_RABBITMQ_PID_FILE: ${DOCKER_RABBITMQ_PID_FILE}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - default
+      - backend
+
+networks:
+  backend:
+    external: true
