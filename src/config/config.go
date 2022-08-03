@@ -76,7 +76,7 @@ func (c *Config) loadAmqpConfig() error {
 
 func (c *Config) loadWebServerAddress() error {
 	c.webServerAddress = os.Getenv("WEB_SERVER_ADDR")
-	if len(c.healthCheckAddress) == 0 {
+	if len(c.webServerAddress) == 0 {
 		c.webServerAddress = "0.0.0.0:80"
 	}
 

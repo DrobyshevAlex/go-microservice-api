@@ -1,0 +1,27 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: app-api
+  labels:
+    app: app-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-api
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: app-api
+    spec:
+      containers:
+        - name: app-api
+          image: app-api:api
+          env:
+            - name: AMQP_HOST
+              value: "rabbitmq"
+            - name: WEB_SERVER_ADDR
+              value: "0.0.0.0:80"
+            - name: HEALTH_CHECK_ADDR
+              value: "0.0.0.0:8080"

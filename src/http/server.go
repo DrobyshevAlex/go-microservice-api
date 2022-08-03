@@ -40,6 +40,8 @@ func (s *Server) Init(addr string, wg *sync.WaitGroup, isDebug bool, wsShutdownC
 	s.registerGlobalMiddlewares()
 	s.initRoutes()
 
+	log.Println("webServer.listen: ", addr)
+
 	s.srv = &http.Server{
 		Addr:    addr,
 		Handler: s.router,
@@ -101,6 +103,15 @@ func (s *Server) initRoutes() {
 		v100.GET("/", s.apiController.Version)
 		v100.GET("/users/:id", s.userController.GetUser)
 	}
+
+	s.router.NoRoute(func(c *gin.Context) {
+		c.JSON(404, gin.H{
+			"code":    "PAGE_NOT_FOUND",
+			"message": "Page not found ",
+			"host":    c.Request.Host,
+			"path":    c.Request.URL.Path,
+		})
+	})
 }
 
 func NewServer(
